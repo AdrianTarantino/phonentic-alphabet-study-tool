@@ -2,7 +2,7 @@
 
 import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { IPA_CATEGORIES } from "@/lib/ipa";
-import { latexToIpa } from "@/lib/latex";
+import { finishLatex, latexToIpa } from "@/lib/latex";
 import { speakIpa } from "@/lib/speech";
 
 export default function Home() {
@@ -37,15 +37,15 @@ export default function Home() {
     const el = inputRef.current;
     const start = el?.selectionStart ?? text.length;
     const end = el?.selectionEnd ?? text.length;
-    const before = latexToIpa(text.slice(0, start) + symbol);
+    const before = finishLatex(text.slice(0, start)) + symbol;
     setTextAndCaret(before + text.slice(end), before.length);
   }
 
   async function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter") return;
     e.preventDefault();
-    // A trailing command (e.g. "\o", which could still become "\oe") is complete now.
-    const finished = latexToIpa(text + " ").slice(0, -1);
+    // Enter also ends a command still being typed, e.g. "\theta".
+    const finished = finishLatex(text);
     if (finished !== text) setTextAndCaret(finished, finished.length);
     const ipa = finished.trim();
     if (!ipa) return;
@@ -76,6 +76,9 @@ export default function Home() {
         autoCapitalize="off"
         className="ipa mt-6 w-full bg-transparent px-1 py-2 text-center text-2xl text-text outline-none placeholder:text-text/40 sm:text-left sm:text-3xl"
       />
+      <p className="mt-1 text-sm text-text/50">
+        End a LaTeX command with a space, e.g. <code>\theta</code> → θ.
+      </p>
       <p className="mt-1 min-h-6 text-sm text-accent" role="status" aria-live="polite">
         {status}
       </p>

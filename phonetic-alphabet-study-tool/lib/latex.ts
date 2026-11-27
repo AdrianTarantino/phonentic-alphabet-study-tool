@@ -2,7 +2,7 @@ import { IPA_CATEGORIES } from "./ipa";
 
 const TIE = "͡";
 
-// Simple commands (\name) -> symbol, built from the table data.
+// Simple commands (\name) -> symbol, built from the table data (tipa names).
 const COMMANDS = new Map<string, string>();
 for (const category of IPA_CATEGORIES) {
   for (const { symbol, latex } of category.symbols) {
@@ -11,39 +11,46 @@ for (const category of IPA_CATEGORIES) {
   }
 }
 
-const COMMAND_NAMES = [...COMMANDS.keys()];
-
-function isPrefixOfLongerCommand(name: string): boolean {
-  return COMMAND_NAMES.some((c) => c.length > name.length && c.startsWith(name));
+// Standard LaTeX Greek letter names, mapped to the IPA symbol people mean by
+// them. IPA uses Latin ɸ for \phi, ɣ for \gamma, ɛ for \epsilon and ʊ for
+// \upsilon rather than the Greek letters.
+const GREEK_ALIASES: Record<string, string> = {
+  theta: "θ",
+  beta: "β",
+  chi: "χ",
+  phi: "ɸ",
+  gamma: "ɣ",
+  epsilon: "ɛ",
+  varepsilon: "ɛ",
+  upsilon: "ʊ",
+};
+for (const [name, symbol] of Object.entries(GREEK_ALIASES)) {
+  if (!COMMANDS.has(name)) COMMANDS.set(name, symbol);
 }
 
 /**
- * Replaces tipa-style LaTeX commands with IPA symbols.
- *
- * A command converts as soon as no longer command starts with it, or once any
- * non-letter follows it. A trailing `{}` ends a command and is removed, as in
- * LaTeX (e.g. `\ae{}b` -> `æb`). Also supports `\t{ab}` (tie bar) and `\c{c}`.
+ * Replaces LaTeX commands with IPA symbols, following LaTeX's rules for where
+ * a command name ends:
+ * - a space or `{}` ends it and is removed: `\theta ` -> `θ`, `\ae{}b` -> `æb`
+ * - any other non-letter ends it and is kept: `\theta\ae ` -> `θæ`
+ * A command at the very end of the text is left alone, since it may still be
+ * being typed. Also supports `\t{ab}` (tie bar) and `\c{c}` (ç).
  */
 export function latexToIpa(input: string): string {
-  let text = input
+  return input
     .replace(/\\c\{c\}/g, "ç")
-    .replace(/\\t\{(\S)(\S)\}/gu, (_, a: string, b: string) => a + TIE + b);
+    .replace(/\\t\{(\S)(\S)\}/gu, (_, a: string, b: string) => a + TIE + b)
+    .replace(
+      /\\([A-Za-z]+)(\{\}| )?/g,
+      (match, name: string, sep: string | undefined, offset: number, whole: string) => {
+        const ended = Boolean(sep) || offset + match.length < whole.length;
+        return ended && COMMANDS.has(name) ? COMMANDS.get(name)! : match;
+      },
+    );
+}
 
-  text = text.replace(
-    /\\([A-Za-z]+)(\{\})?/g,
-    (match, name: string, braces: string | undefined, offset: number, whole: string) => {
-      const ended = Boolean(braces) || offset + match.length < whole.length;
-      if (COMMANDS.has(name) && (ended || !isPrefixOfLongerCommand(name))) {
-        return COMMANDS.get(name)!;
-      }
-      if (!ended && isPrefixOfLongerCommand(name)) return match; // still typing
-      // The letters run past a command, e.g. "\ox" -> "øx".
-      for (let i = name.length - 1; i > 0; i--) {
-        const head = name.slice(0, i);
-        if (COMMANDS.has(head)) return COMMANDS.get(head)! + name.slice(i) + (braces ?? "");
-      }
-      return match;
-    },
-  );
-  return text;
+/** Like latexToIpa, but also converts a command at the very end of the text. */
+export function finishLatex(input: string): string {
+  const out = latexToIpa(input + " ");
+  return out.endsWith(" ") ? out.slice(0, -1) : out;
 }
