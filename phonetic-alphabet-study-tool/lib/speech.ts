@@ -87,6 +87,9 @@ function plan(segments: Segment[]): { runs: Run[]; unknown: string[] } {
   return { runs, unknown };
 }
 
+// Where public/espeak/ is served from (a sub-path on GitHub Pages).
+const ESPEAK_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/espeak`;
+
 let factory: Promise<{ create: EspeakFactory; wasm: ArrayBuffer }> | null = null;
 
 function loadEspeak() {
@@ -95,12 +98,12 @@ function loadEspeak() {
       "The speech engine files are missing from public/espeak/. Stop the dev server, run `npm install`, then `npm run dev` again.",
     );
     const [mod, wasm] = await Promise.all([
-      (import(/* webpackIgnore: true */ "/espeak/espeak-ng.js" as string) as Promise<{ default: EspeakFactory }>).catch(
+      (import(/* webpackIgnore: true */ `${ESPEAK_URL}/espeak-ng.js`) as Promise<{ default: EspeakFactory }>).catch(
         () => {
           throw missing;
         },
       ),
-      fetch("/espeak/espeak-ng.wasm").then((r) => {
+      fetch(`${ESPEAK_URL}/espeak-ng.wasm`).then((r) => {
         if (!r.ok) throw missing;
         return r.arrayBuffer();
       }),

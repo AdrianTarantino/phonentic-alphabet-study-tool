@@ -7,7 +7,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/copy-espeak.mjs",
     "build": "next build",
-    "start": "next start",
+    "start": "npx serve@14.2.8 out",
     "lint": "eslint",
     "postinstall": "node scripts/copy-espeak.mjs"
   },

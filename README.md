@@ -25,3 +25,11 @@ eSpeak doesn't read IPA. It reads its own phoneme codes, and each language voice
 Symbols with no matching sound in this eSpeak build are skipped and listed under the input: the clicks (ʘ ǀ ǃ ǂ ǁ), the implosives ɓ ʄ ɠ ʛ, the ejective mark ʼ, and ɞ ɥ ɦ ɧ ɮ ɰ ɱ ɶ ɺ ʏ ʙ ʜ ʟ ʡ ʢ ⱱ ˑ. Affricates with no single eSpeak sound (such as b͡v or t͡θ) are played as their two parts.
 
 eSpeak NG is licensed under GPL-3.0-or-later, which matters if you distribute this app.
+
+## Hosting on GitHub Pages
+
+`.github/workflows/deploy-pages.yml` builds the app as a static site (`output: "export"` in `next.config.ts`) and publishes it to GitHub Pages on every push to `main`.
+
+One-time setup: in the repository on GitHub, go to **Settings → Pages**, and under **Build and deployment → Source** choose **GitHub Actions**. The site is then published at `https://<your-username>.github.io/phonentic-alphabet-study-tool/`.
+
+To check the static build locally: `npm run build`, then `npm start` (serves `out/`). Locally the site runs from `/`; on Pages the workflow sets `PAGES_BASE_PATH` to the repository's sub-path.
