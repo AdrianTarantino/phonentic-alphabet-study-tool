@@ -12,7 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // eSpeak NG's compiled build, copied in by scripts/copy-espeak.mjs.
+    "public/espeak/**",
   ]),
+  {
+    // Plain Node script run with Playwright, not part of the app.
+    files: ["scripts/espeak-map/probe.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
 ]);
 
 export default eslintConfig;

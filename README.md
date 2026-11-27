@@ -18,4 +18,10 @@ A command turns into its symbol as soon as it can't be the start of a longer com
 
 ## Audio
 
-Pressing Enter calls `speakIpa` in `phonetic-alphabet-study-tool/lib/speech.ts`. Browsers' built-in speech synthesis reads text, not IPA, so a speech engine that accepts phonemes still needs to be connected there.
+Pressing Enter speaks the IPA with [eSpeak NG](https://github.com/espeak-ng/espeak-ng), compiled to WebAssembly (npm package [`espeak-ng`](https://www.npmjs.com/package/espeak-ng)). `npm install`, `npm run dev` and `npm run build` copy it into `public/espeak/`, and the browser loads it the first time you press Enter (about 18 MB).
+
+eSpeak doesn't read IPA. It reads its own phoneme codes, and each language voice has its own set. `lib/espeak-map.json` lists, for each IPA sound, the code in each voice that eSpeak itself reports as that sound (via `--ipa`). It was generated with the scripts in `scripts/espeak-map/`. A word is spoken by the voice that can say the most of it, English voices first; if no single voice can say all of it, it is split between voices.
+
+Symbols with no matching sound in this eSpeak build are skipped and listed under the input: the clicks (ʘ ǀ ǃ ǂ ǁ), the implosives ɓ ʄ ɠ ʛ, the ejective mark ʼ, and ɞ ɥ ɦ ɧ ɮ ɰ ɱ ɶ ɺ ʏ ʙ ʜ ʟ ʡ ʢ ⱱ ˑ. Affricates with no single eSpeak sound (such as b͡v or t͡θ) are played as their two parts.
+
+eSpeak NG is licensed under GPL-3.0-or-later, which matters if you distribute this app.
