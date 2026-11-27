@@ -18,7 +18,7 @@ A command turns into its symbol as soon as it can't be the start of a longer com
 
 ## Audio
 
-Pressing Enter speaks the IPA with [eSpeak NG](https://github.com/espeak-ng/espeak-ng), compiled to WebAssembly (npm package [`espeak-ng`](https://www.npmjs.com/package/espeak-ng)). `npm install` copies it into `public/espeak/` and the browser loads it the first time you press Enter (about 18 MB).
+Pressing Enter speaks the IPA with [eSpeak NG](https://github.com/espeak-ng/espeak-ng), compiled to WebAssembly (npm package [`espeak-ng`](https://www.npmjs.com/package/espeak-ng)). `npm install`, `npm run dev` and `npm run build` copy it into `public/espeak/`, and the browser loads it the first time you press Enter (about 18 MB).
 
 eSpeak doesn't read IPA. It reads its own phoneme codes, and each language voice has its own set. `lib/espeak-map.json` lists, for each IPA sound, the code in each voice that eSpeak itself reports as that sound (via `--ipa`). It was generated with the scripts in `scripts/espeak-map/`. A word is spoken by the voice that can say the most of it, English voices first; if no single voice can say all of it, it is split between voices.
 

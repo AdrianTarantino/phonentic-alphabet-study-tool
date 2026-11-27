@@ -91,10 +91,17 @@ let factory: Promise<{ create: EspeakFactory; wasm: ArrayBuffer }> | null = null
 
 function loadEspeak() {
   factory ??= (async () => {
+    const missing = new Error(
+      "The speech engine files are missing from public/espeak/. Stop the dev server, run `npm install`, then `npm run dev` again.",
+    );
     const [mod, wasm] = await Promise.all([
-      import(/* webpackIgnore: true */ "/espeak/espeak-ng.js" as string) as Promise<{ default: EspeakFactory }>,
+      (import(/* webpackIgnore: true */ "/espeak/espeak-ng.js" as string) as Promise<{ default: EspeakFactory }>).catch(
+        () => {
+          throw missing;
+        },
+      ),
       fetch("/espeak/espeak-ng.wasm").then((r) => {
-        if (!r.ok) throw new Error("Could not load the speech engine.");
+        if (!r.ok) throw missing;
         return r.arrayBuffer();
       }),
     ]);
