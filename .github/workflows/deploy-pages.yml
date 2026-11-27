@@ -1,0 +1,61 @@
+# Builds the Next.js app as a static site and publishes it to GitHub Pages.
+# Runs on every push to main, and can be started by hand from the Actions tab.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Lets the workflow publish to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; don't cancel one that is already running.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: phonetic-alphabet-study-tool
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: phonetic-alphabet-study-tool/package-lock.json
+
+      # Gives the site's URL path, e.g. /phonentic-alphabet-study-tool.
+      - id: pages
+        uses: actions/configure-pages@v6
+
+      # Also copies the eSpeak speech engine into public/espeak/ (postinstall).
+      - run: npm ci
+
+      # Writes the static site to out/.
+      - run: npm run build
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: phonetic-alphabet-study-tool/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
