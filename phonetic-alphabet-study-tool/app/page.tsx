@@ -51,8 +51,8 @@ export default function Home() {
     if (!ipa) return;
     try {
       setStatus(`Playing /${ipa}/…`);
-      await speakIpa(ipa);
-      setStatus("");
+      const skipped = await speakIpa(ipa);
+      setStatus(skipped.length ? `Skipped sounds the speech engine doesn't have: ${[...new Set(skipped)].join(" ")}` : "");
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Could not play audio.");
     }
@@ -77,7 +77,7 @@ export default function Home() {
         className="ipa mt-6 w-full bg-transparent px-1 py-2 text-center text-2xl text-text outline-none placeholder:text-text/40 sm:text-left sm:text-3xl"
       />
       <p className="mt-1 text-sm text-text/50">
-        End a LaTeX command with a space, e.g. <code>\theta</code> → θ.
+        End a LaTeX command with a space, e.g. <code>\theta</code> → θ. Press Enter to hear it.
       </p>
       <p className="mt-1 min-h-6 text-sm text-accent" role="status" aria-live="polite">
         {status}
