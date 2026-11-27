@@ -6,7 +6,7 @@
   --color-primary: #cddda0;
   --color-secondary: #2e813f;
   --color-accent: #59c399;
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-roboto-slab), serif;
 }
 
 body {
@@ -14,9 +14,9 @@ body {
   color: var(--color-text);
 }
 
-/* Fonts with full IPA coverage first, then a general fallback. */
+/* Roboto Slab first; IPA symbols it lacks come from the Noto Serif fallback. */
 .ipa {
-  font-family: "Charis SIL", "Doulos SIL", "Noto Sans", var(--font-noto-sans), "Segoe UI", sans-serif;
+  font-family: var(--font-roboto-slab), var(--font-ipa-fallback), serif;
 }
 
 /* Keep the table's scroll bar visible on the right, in the theme colours. */
